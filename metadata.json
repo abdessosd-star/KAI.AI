@@ -1,0 +1,7 @@
+{
+  "name": "KAI-Model Self-Assessment",
+  "description": "An AI-powered career assessment tool using the KAI model to evaluate job tasks against AI automation, augmentation, and human-centric needs.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
