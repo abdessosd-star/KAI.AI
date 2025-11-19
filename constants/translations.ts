@@ -1,4 +1,5 @@
 
+
 export const translations = {
   nl: {
     header: {
@@ -7,6 +8,35 @@ export const translations = {
       assess: "Impact Meten",
       impact: "Carrière Strategie",
       dashboard: "Dashboard"
+    },
+    landing: {
+      heroTitle: "Is jouw baan klaar voor AI?",
+      heroSubtitle: "Ontdek met het KAI-model welke taken je moet automatiseren, versterken of menselijk houden. Krijg direct een persoonlijk strategisch rapport.",
+      cta: "Start Assessment",
+      kaiTitle: "Het KAI-Model Uitgelegd",
+      kaiSubtitle: "Een raamwerk om de impact van AI op jouw werk te classificeren:",
+      cards: {
+        automate: {
+          title: "Automatiseren",
+          desc: "Routinematige, repetitieve taken die AI volledig kan overnemen.",
+          tags: ["Hoge Data", "Patroonherkenning"]
+        },
+        augment: {
+          title: "Versterken",
+          desc: "Complexe taken waar AI dient als krachtige co-piloot voor snelheid en kwaliteit.",
+          tags: ["Complexiteit", "Creativiteit"]
+        },
+        human: {
+          title: "Menselijk Blijven",
+          desc: "Taken die empathie, ethiek, oordeelsvorming en uniek menselijk contact vereisen.",
+          tags: ["Empathie", "Oordeelsvorming"]
+        }
+      },
+      features: {
+        step1: { title: "1. Scope", desc: "Definieer je rol en skills." },
+        step2: { title: "2. Analyseer", desc: "Meet AI-potentieel per taak." },
+        step3: { title: "3. Strategie", desc: "Ontvang je actieplan." }
+      }
     },
     step1: {
       title: "Stap 1: Breng je rol in kaart",
@@ -106,6 +136,35 @@ export const translations = {
       assess: "Assess Impact",
       impact: "Career Strategy",
       dashboard: "Dashboard"
+    },
+    landing: {
+      heroTitle: "Is your job ready for AI?",
+      heroSubtitle: "Use the KAI model to discover which tasks to automate, augment, or keep human. Get a personalized strategic report instantly.",
+      cta: "Start Assessment",
+      kaiTitle: "The KAI Model Explained",
+      kaiSubtitle: "A framework to classify the impact of AI on your work:",
+      cards: {
+        automate: {
+          title: "Automate",
+          desc: "Routine, repetitive tasks that AI can fully take over.",
+          tags: ["High Data", "Pattern Recognition"]
+        },
+        augment: {
+          title: "Augment",
+          desc: "Complex tasks where AI serves as a powerful co-pilot for speed and quality.",
+          tags: ["Complexity", "Creativity"]
+        },
+        human: {
+          title: "Keep Human",
+          desc: "Tasks requiring empathy, ethics, judgment, and unique human connection.",
+          tags: ["Empathy", "Judgment"]
+        }
+      },
+      features: {
+        step1: { title: "1. Scope", desc: "Define your role and skills." },
+        step2: { title: "2. Analyze", desc: "Measure AI potential per task." },
+        step3: { title: "3. Strategy", desc: "Get your action plan." }
+      }
     },
     step1: {
       title: "Step 1: Scope Your Role",

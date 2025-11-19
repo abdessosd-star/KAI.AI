@@ -1,18 +1,19 @@
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Step, Task, SavedProfile, Language } from './types';
 import { Step1 } from './components/Step1';
 import { Step2 } from './components/Step2';
 import { Step3 } from './components/Step3';
 import { Dashboard } from './components/Dashboard';
+import { Landing } from './components/Landing';
 import { LiveAgent } from './components/LiveAgent';
 import { ChatBot } from './components/ChatBot';
 import { EmbedGenerator } from './components/EmbedGenerator';
-import { Layers, ChevronRight, LayoutDashboard, Share2, X, Globe } from 'lucide-react';
+import { Layers, ChevronRight, LayoutDashboard, Share2, X, Globe, Loader2 } from 'lucide-react';
 import { translations } from './constants/translations';
 
-function App() {
-  const [currentStep, setCurrentStep] = useState<Step>(Step.Scope);
+function AppContent() {
+  const [currentStep, setCurrentStep] = useState<Step>(Step.Landing);
   const [jobTitle, setJobTitle] = useState('');
   const [rawTasks, setRawTasks] = useState<string[]>([]);
   const [hardSkills, setHardSkills] = useState<string[]>([]);
@@ -57,6 +58,10 @@ function App() {
     setCurrentStep(Step.Scope);
   };
 
+  const goToHome = () => {
+    setCurrentStep(Step.Landing);
+  };
+
   const goToDashboard = () => {
     setCurrentStep(Step.Dashboard);
   };
@@ -70,15 +75,15 @@ function App() {
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={handleNewAssessment}>
+          <div className="flex items-center gap-2 cursor-pointer" onClick={goToHome}>
             <div className="bg-blue-600 p-1.5 rounded-lg text-white">
               <Layers size={20} />
             </div>
             <span className="font-bold text-xl text-slate-800">KAI<span className="text-blue-600">.ai</span></span>
           </div>
           
-          {/* Progress Steps */}
-          {currentStep !== Step.Dashboard && (
+          {/* Progress Steps - Hide on Landing and Dashboard */}
+          {currentStep !== Step.Dashboard && currentStep !== Step.Landing && (
             <div className="hidden md:flex items-center gap-4 text-sm font-medium">
               <div className={`flex items-center gap-2 ${currentStep >= Step.Scope ? 'text-blue-600' : 'text-slate-400'}`}>
                 <span className={`w-6 h-6 rounded-full flex items-center justify-center border ${currentStep >= Step.Scope ? 'bg-blue-50 border-blue-200' : 'border-slate-200'}`}>1</span>
@@ -127,6 +132,7 @@ function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative">
+        {currentStep === Step.Landing && <Landing onStart={handleNewAssessment} language={language} />}
         {currentStep === Step.Scope && <Step1 onNext={handleStep1Next} language={language} />}
         {currentStep === Step.Assess && <Step2 jobTitle={jobTitle} rawTasks={rawTasks} onNext={handleStep2Next} language={language} />}
         {currentStep === Step.Impact && (
@@ -142,8 +148,8 @@ function App() {
         {currentStep === Step.Dashboard && <Dashboard onLoadProfile={handleLoadProfile} onNewAssessment={handleNewAssessment} language={language} />}
       </main>
 
-      {/* Embed Generator - Only on Home Page (Scope) */}
-      {currentStep === Step.Scope && (
+      {/* Embed Generator - Only on Landing & Scope */}
+      {(currentStep === Step.Scope || currentStep === Step.Landing) && (
         <div className="fixed right-0 top-24 z-20 flex flex-col items-end">
             {!showHomeEmbed ? (
                <button 
@@ -176,6 +182,18 @@ function App() {
         </>
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Suspense fallback={
+      <div className="h-screen w-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="animate-spin text-blue-600" size={48} />
+      </div>
+    }>
+      <AppContent />
+    </Suspense>
   );
 }
 

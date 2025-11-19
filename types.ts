@@ -36,6 +36,7 @@ export interface AnalysisResult {
 }
 
 export enum Step {
+  Landing = 0,
   Scope = 1,
   Assess = 2,
   Impact = 3,
