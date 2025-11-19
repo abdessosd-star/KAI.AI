@@ -1,23 +1,27 @@
+
 import React, { useState, useEffect } from 'react';
-import { Task } from '../types';
+import { Task, Language } from '../types';
 import { assessTasksWithAI } from '../services/geminiService';
 import { ArrowRight, BrainCircuit, Info } from 'lucide-react';
+import { translations } from '../constants/translations';
 
 interface Step2Props {
   jobTitle: string;
   rawTasks: string[];
   onNext: (assessedTasks: Task[]) => void;
+  language: Language;
 }
 
-export const Step2: React.FC<Step2Props> = ({ jobTitle, rawTasks, onNext }) => {
+export const Step2: React.FC<Step2Props> = ({ jobTitle, rawTasks, onNext, language }) => {
   const [loading, setLoading] = useState(true);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const t = translations[language].step2;
 
   // Initial AI Assessment
   useEffect(() => {
     const init = async () => {
       try {
-        const assessed = await assessTasksWithAI(jobTitle, rawTasks);
+        const assessed = await assessTasksWithAI(jobTitle, rawTasks, language);
         // Apply the enhanced client-side logic immediately to AI results too, to ensure consistency
         const calibrated = assessed.map(t => ({
           ...t,
@@ -93,30 +97,48 @@ export const Step2: React.FC<Step2Props> = ({ jobTitle, rawTasks, onNext }) => {
   const criteria = [
     { 
       key: 'patternRecognition', 
-      label: 'Repetitive Pattern', 
-      tooltip: "High scores (4-5) = Routine, predictable tasks that are prime targets for automation."
+      label: t.labels.pattern, 
+      tooltip: t.tooltips.pattern
     },
     { 
       key: 'humanInteraction', 
-      label: 'Human Empathy', 
-      tooltip: "High scores (4-5) = Requires deep emotional intelligence, negotiation, or care. Hard to automate."
+      label: t.labels.human, 
+      tooltip: t.tooltips.human
     },
     { 
       key: 'complexity', 
-      label: 'Complexity', 
-      tooltip: "High scores (4-5) = Ambiguous situations requiring strategic judgment and context handling."
+      label: t.labels.complexity, 
+      tooltip: t.tooltips.complexity
     },
     { 
       key: 'creativity', 
-      label: 'Creativity', 
-      tooltip: "High scores (4-5) = Requires original innovation, ideation, or artistic creation."
+      label: t.labels.creativity, 
+      tooltip: t.tooltips.creativity
     },
     { 
       key: 'dataAccessibility', 
-      label: 'Data Available', 
-      tooltip: "High scores (4-5) = Data is structured, digital, and accessible for training AI models."
+      label: t.labels.data, 
+      tooltip: t.tooltips.data
     },
   ];
+
+  const getCategoryLabel = (category: string) => {
+      switch (category) {
+          case 'Automate': return t.automate;
+          case 'Augment': return t.augment;
+          case 'Human': return t.human;
+          default: return category;
+      }
+  }
+
+  const getContextHint = (category: string) => {
+      switch (category) {
+          case 'Automate': return t.categories.automate;
+          case 'Augment': return t.categories.augment;
+          case 'Human': return t.categories.human;
+          default: return "";
+      }
+  }
 
   if (loading) {
     return (
@@ -126,8 +148,8 @@ export const Step2: React.FC<Step2Props> = ({ jobTitle, rawTasks, onNext }) => {
           <BrainCircuit className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-600" size={24} />
         </div>
         <div className="text-center space-y-2">
-          <h3 className="text-xl font-semibold text-slate-800">Analyzing Tasks with Gemini 3 Pro</h3>
-          <p className="text-slate-500">Using Thinking Mode to evaluate complexity, empathy, and automation potential...</p>
+          <h3 className="text-xl font-semibold text-slate-800">{t.loadingTitle}</h3>
+          <p className="text-slate-500">{t.loadingSubtitle}</p>
         </div>
       </div>
     );
@@ -136,10 +158,9 @@ export const Step2: React.FC<Step2Props> = ({ jobTitle, rawTasks, onNext }) => {
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-20 animate-in fade-in">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-slate-800">Step 2: Impact Assessment</h2>
+        <h2 className="text-2xl font-bold text-slate-800">{t.title}</h2>
         <p className="text-slate-500 max-w-2xl mx-auto">
-          Gemini has pre-rated your tasks based on the KAI model. Adjust the sliders to refine the analysis.
-          This determines if a task should be <span className="text-red-500 font-medium">Automated</span>, <span className="text-blue-500 font-medium">Augmented</span>, or remain <span className="text-green-600 font-medium">Human</span>.
+          {t.subtitle} <span className="text-red-500 font-medium">{t.automate}</span>, <span className="text-blue-500 font-medium">{t.augment}</span>, of <span className="text-green-600 font-medium">{t.human}</span>.
         </p>
       </div>
 
@@ -154,7 +175,7 @@ export const Step2: React.FC<Step2Props> = ({ jobTitle, rawTasks, onNext }) => {
                         <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider
                         ${task.category === 'Automate' ? 'bg-red-100 text-red-700' : 
                         task.category === 'Human' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                        {task.category}
+                        {getCategoryLabel(task.category)}
                     </span>
                     </div>
                 </div>
@@ -163,15 +184,13 @@ export const Step2: React.FC<Step2Props> = ({ jobTitle, rawTasks, onNext }) => {
                    <span className={`text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider transition-colors duration-300
                     ${task.category === 'Automate' ? 'bg-red-100 text-red-700' : 
                       task.category === 'Human' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}`}>
-                     {task.category}
+                     {getCategoryLabel(task.category)}
                    </span>
                 </div>
                 
                 {/* Dynamic Context Hint based on Category */}
                 <p className="text-xs text-slate-400 mt-3 italic">
-                    {task.category === 'Automate' && 'High potential for AI agents to handle this fully.'}
-                    {task.category === 'Augment' && 'AI can serve as a copilot to increase speed/quality.'}
-                    {task.category === 'Human' && 'Requires unique human judgment or connection.'}
+                    {getContextHint(task.category)}
                 </p>
               </div>
 
@@ -214,7 +233,7 @@ export const Step2: React.FC<Step2Props> = ({ jobTitle, rawTasks, onNext }) => {
           onClick={() => onNext(tasks)}
           className="px-8 py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 shadow-xl hover:shadow-2xl transition-all flex items-center gap-3 hover:scale-[1.02]"
         >
-          Analyze Career Impact <ArrowRight size={20} />
+          {t.analyzeButton} <ArrowRight size={20} />
         </button>
       </div>
     </div>

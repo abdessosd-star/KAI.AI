@@ -1,9 +1,17 @@
+
 import React, { useState } from 'react';
 import { Copy, Check, Code } from 'lucide-react';
+import { Language } from '../types';
+import { translations } from '../constants/translations';
 
-export const EmbedGenerator: React.FC = () => {
+interface EmbedGeneratorProps {
+  language: Language;
+}
+
+export const EmbedGenerator: React.FC<EmbedGeneratorProps> = ({ language }) => {
   const [copied, setCopied] = useState(false);
   const embedCode = `<iframe src="${window.location.origin}" width="100%" height="800" frameborder="0" title="KAI Career Assessment"></iframe>`;
+  const t = translations[language].embed;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(embedCode);
@@ -15,10 +23,10 @@ export const EmbedGenerator: React.FC = () => {
     <div className="bg-slate-800 text-white p-6 rounded-2xl shadow-2xl w-80">
       <div className="flex items-center gap-2 mb-4 text-blue-400">
         <Code size={20} />
-        <h3 className="font-bold">Embed This Tool</h3>
+        <h3 className="font-bold">{t.title}</h3>
       </div>
       <p className="text-xs text-slate-400 mb-4">
-        Copy this code to add the KAI Assessment tool to your own website or dashboard.
+        {t.desc}
       </p>
       <div className="bg-slate-900 p-3 rounded-lg border border-slate-700 relative group">
         <code className="text-xs font-mono text-slate-300 break-all block pr-8">

@@ -1,11 +1,19 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { LiveSessionManager } from '../services/liveService';
 import { Mic, MicOff, Activity, X } from 'lucide-react';
+import { Language } from '../types';
+import { translations } from '../constants/translations';
 
-export const LiveAgent: React.FC = () => {
+interface LiveAgentProps {
+  language: Language;
+}
+
+export const LiveAgent: React.FC<LiveAgentProps> = ({ language }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [status, setStatus] = useState<string>("disconnected");
   const managerRef = useRef<LiveSessionManager | null>(null);
+  const t = translations[language].live;
 
   useEffect(() => {
     return () => {
@@ -15,12 +23,15 @@ export const LiveAgent: React.FC = () => {
     };
   }, []);
 
+  // Update manager's language if possible, but session is stateful. 
+  // Re-connecting on language switch would be disruptive, so we just pass it on new connections.
+
   const toggleSession = async () => {
     if (status === "connected") {
       managerRef.current?.disconnect();
       managerRef.current = null;
     } else {
-      managerRef.current = new LiveSessionManager(setStatus);
+      managerRef.current = new LiveSessionManager(setStatus, language);
       await managerRef.current.connect();
     }
   };
@@ -32,7 +43,7 @@ export const LiveAgent: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2">
               <span className={`w-2 h-2 rounded-full ${status === 'connected' ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}`}></span>
-              <h3 className="font-bold text-slate-800">Live Career Coach</h3>
+              <h3 className="font-bold text-slate-800">{t.title}</h3>
             </div>
             <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600">
               <X size={18} />
@@ -49,7 +60,7 @@ export const LiveAgent: React.FC = () => {
                 <div className="w-1 h-4 bg-blue-500 animate-[bounce_0.9s_infinite] mx-0.5"></div>
               </div>
             ) : (
-              <p className="text-sm text-slate-500">Ready to talk</p>
+              <p className="text-sm text-slate-500">{t.ready}</p>
             )}
           </div>
 
@@ -61,9 +72,9 @@ export const LiveAgent: React.FC = () => {
                 : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
           >
-            {status === 'connected' ? <><MicOff size={18} /> End Session</> : <><Mic size={18} /> Start Voice Chat</>}
+            {status === 'connected' ? <><MicOff size={18} /> {t.end}</> : <><Mic size={18} /> {t.start}</>}
           </button>
-          <p className="text-xs text-slate-400 text-center mt-3">Powered by Gemini 2.5 Live API</p>
+          <p className="text-xs text-slate-400 text-center mt-3">{t.powered}</p>
         </div>
       )}
 

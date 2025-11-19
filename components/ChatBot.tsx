@@ -1,16 +1,29 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Send, User, Bot, X, Loader2 } from 'lucide-react';
-import { ChatMessage } from '../types';
+import { ChatMessage, Language } from '../types';
 import { sendChatMessage } from '../services/geminiService';
+import { translations } from '../constants/translations';
 
-export const ChatBot: React.FC = () => {
+interface ChatBotProps {
+  language: Language;
+}
+
+export const ChatBot: React.FC<ChatBotProps> = ({ language }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: '1', role: 'model', text: "Hi! I'm your AI career assistant. Ask me anything about your assessment." }
-  ]);
+  const t = translations[language].chat;
+
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Reset welcome message when language changes or on init
+  useEffect(() => {
+    if (messages.length === 0) {
+       setMessages([{ id: '1', role: 'model', text: t.welcome }]);
+    }
+  }, [language, t.welcome]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,7 +53,7 @@ export const ChatBot: React.FC = () => {
         parts: [{ text: m.text }]
       }));
 
-      const responseText = await sendChatMessage(history, newUserMessage.text);
+      const responseText = await sendChatMessage(history, newUserMessage.text, language);
 
       const newBotMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -51,7 +64,7 @@ export const ChatBot: React.FC = () => {
       setMessages(prev => [...prev, newBotMessage]);
     } catch (error) {
       console.error("Chat error", error);
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: "Sorry, I encountered an error." }]);
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: t.error }]);
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +86,7 @@ export const ChatBot: React.FC = () => {
           <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 rounded-t-lg">
             <div className="flex items-center gap-2">
               <Bot size={18} className="text-blue-600" />
-              <h3 className="font-semibold text-slate-700">Assessment Chat</h3>
+              <h3 className="font-semibold text-slate-700">{t.title}</h3>
             </div>
             <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600">
               <X size={18} />
@@ -113,7 +126,7 @@ export const ChatBot: React.FC = () => {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder="Ask about AI impact..."
+              placeholder={t.placeholder}
               className="flex-1 px-3 py-2 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
             />
             <button

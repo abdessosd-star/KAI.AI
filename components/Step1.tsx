@@ -2,12 +2,15 @@
 import React, { useState } from 'react';
 import { suggestRoleDetails } from '../services/geminiService';
 import { Loader2, Plus, Trash2, Check, Sparkles, Brain, Heart } from 'lucide-react';
+import { Language } from '../types';
+import { translations } from '../constants/translations';
 
 interface Step1Props {
   onNext: (jobTitle: string, tasks: string[], hardSkills: string[], softSkills: string[]) => void;
+  language: Language;
 }
 
-export const Step1: React.FC<Step1Props> = ({ onNext }) => {
+export const Step1: React.FC<Step1Props> = ({ onNext, language }) => {
   const [jobTitle, setJobTitle] = useState('');
   const [tasks, setTasks] = useState<string[]>([]);
   const [hardSkills, setHardSkills] = useState<string[]>([]);
@@ -20,11 +23,13 @@ export const Step1: React.FC<Step1Props> = ({ onNext }) => {
   const [customHardSkill, setCustomHardSkill] = useState('');
   const [customSoftSkill, setCustomSoftSkill] = useState('');
 
+  const t = translations[language].step1;
+
   const handleGenerate = async () => {
     if (!jobTitle) return;
     setLoading(true);
     try {
-      const result = await suggestRoleDetails(jobTitle);
+      const result = await suggestRoleDetails(jobTitle, language);
       setTasks(result.tasks);
       setHardSkills(result.hardSkills);
       setSoftSkills(result.softSkills);
@@ -55,19 +60,19 @@ export const Step1: React.FC<Step1Props> = ({ onNext }) => {
   return (
     <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold text-slate-800">Step 1: Scope Your Role</h2>
-        <p className="text-slate-500">Define your responsibilities and skills. AI will help structure your profile.</p>
+        <h2 className="text-2xl font-bold text-slate-800">{t.title}</h2>
+        <p className="text-slate-500">{t.subtitle}</p>
       </div>
 
       <div className="space-y-4">
-        <label className="block text-sm font-medium text-slate-700">Job Title</label>
+        <label className="block text-sm font-medium text-slate-700">{t.jobTitleLabel}</label>
         <div className="flex gap-2">
           <input
             type="text"
             value={jobTitle}
             onChange={(e) => setJobTitle(e.target.value)}
             className="flex-1 px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
-            placeholder="e.g., Marketing Manager, Software Engineer"
+            placeholder={t.placeholder}
           />
           <button
             onClick={handleGenerate}
@@ -75,7 +80,7 @@ export const Step1: React.FC<Step1Props> = ({ onNext }) => {
             className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 shadow-md transition-all whitespace-nowrap"
           >
             {loading ? <Loader2 className="animate-spin" size={20} /> : <Sparkles size={20} />}
-            {loading ? 'Scoping...' : 'Auto-Scope'}
+            {loading ? t.buttonLoading : t.button}
           </button>
         </div>
       </div>
@@ -87,9 +92,9 @@ export const Step1: React.FC<Step1Props> = ({ onNext }) => {
             <div className="flex justify-between items-center">
               <h3 className="font-semibold text-slate-800 flex items-center gap-2">
                 <div className="bg-blue-100 p-1 rounded-md"><Sparkles size={14} className="text-blue-600"/></div>
-                Key Responsibilities
+                {t.responsibilities}
               </h3>
-              <span className="text-xs text-slate-400">{tasks.length} items</span>
+              <span className="text-xs text-slate-400">{tasks.length} {t.items}</span>
             </div>
             <ul className="grid gap-2">
               {tasks.map((task, idx) => (
@@ -108,7 +113,7 @@ export const Step1: React.FC<Step1Props> = ({ onNext }) => {
                 value={customTask}
                 onChange={(e) => setCustomTask(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && addItem(tasks, setTasks, customTask, setCustomTask)}
-                placeholder="Add a task..."
+                placeholder={t.addTask}
                 className="flex-1 px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
               <button onClick={() => addItem(tasks, setTasks, customTask, setCustomTask)} className="p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200">
@@ -123,7 +128,7 @@ export const Step1: React.FC<Step1Props> = ({ onNext }) => {
               <div className="flex justify-between items-center">
                 <h3 className="font-semibold text-slate-800 flex items-center gap-2">
                    <div className="bg-indigo-100 p-1 rounded-md"><Brain size={14} className="text-indigo-600"/></div>
-                   Hard Skills
+                   {t.hardSkills}
                 </h3>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -142,7 +147,7 @@ export const Step1: React.FC<Step1Props> = ({ onNext }) => {
                   value={customHardSkill}
                   onChange={(e) => setCustomHardSkill(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addItem(hardSkills, setHardSkills, customHardSkill, setCustomHardSkill)}
-                  placeholder="Add skill..."
+                  placeholder={t.addSkill}
                   className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 <button onClick={() => addItem(hardSkills, setHardSkills, customHardSkill, setCustomHardSkill)} className="p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200">
@@ -156,7 +161,7 @@ export const Step1: React.FC<Step1Props> = ({ onNext }) => {
               <div className="flex justify-between items-center">
                 <h3 className="font-semibold text-slate-800 flex items-center gap-2">
                   <div className="bg-pink-100 p-1 rounded-md"><Heart size={14} className="text-pink-600"/></div>
-                  Soft Skills
+                  {t.softSkills}
                 </h3>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -175,7 +180,7 @@ export const Step1: React.FC<Step1Props> = ({ onNext }) => {
                   value={customSoftSkill}
                   onChange={(e) => setCustomSoftSkill(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addItem(softSkills, setSoftSkills, customSoftSkill, setCustomSoftSkill)}
-                  placeholder="Add skill..."
+                  placeholder={t.addSkill}
                   className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-pink-500"
                 />
                 <button onClick={() => addItem(softSkills, setSoftSkills, customSoftSkill, setCustomSoftSkill)} className="p-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200">
@@ -191,7 +196,7 @@ export const Step1: React.FC<Step1Props> = ({ onNext }) => {
               disabled={tasks.length === 0}
               className="px-8 py-3 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
             >
-              Continue to Assessment <Check size={18} />
+              {t.nextButton} <Check size={18} />
             </button>
           </div>
         </div>

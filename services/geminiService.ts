@@ -1,13 +1,15 @@
 
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { Task, AnalysisResult } from "../types";
+import { Task, AnalysisResult, Language } from "../types";
 
 // Helper to get client with key
 const getClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // 1. Suggest Role Details (Flash - Fast)
-export const suggestRoleDetails = async (jobTitle: string): Promise<{ tasks: string[], hardSkills: string[], softSkills: string[] }> => {
+export const suggestRoleDetails = async (jobTitle: string, language: Language = 'en'): Promise<{ tasks: string[], hardSkills: string[], softSkills: string[] }> => {
   const ai = getClient();
+  const langName = language === 'nl' ? 'Dutch' : 'English';
+  
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
     contents: `Analyze the role of a "${jobTitle}". 
@@ -16,6 +18,7 @@ export const suggestRoleDetails = async (jobTitle: string): Promise<{ tasks: str
     2. 5 key hard skills (technical).
     3. 5 key soft skills (interpersonal).
     
+    IMPORTANT: Output everything in ${langName}.
     Return as JSON object.`,
     config: {
       responseMimeType: 'application/json',
@@ -36,9 +39,10 @@ export const suggestRoleDetails = async (jobTitle: string): Promise<{ tasks: str
 };
 
 // 2. Assess Tasks (Flash + Light Thinking - Balanced Speed/Smarts)
-export const assessTasksWithAI = async (jobTitle: string, tasks: string[]): Promise<Task[]> => {
+export const assessTasksWithAI = async (jobTitle: string, tasks: string[], language: Language = 'en'): Promise<Task[]> => {
   const ai = getClient();
-  
+  const langName = language === 'nl' ? 'Dutch' : 'English';
+
   const prompt = `
     As an expert AI workforce consultant (KAI Model), analyze these tasks for a "${jobTitle}".
     
@@ -53,6 +57,8 @@ export const assessTasksWithAI = async (jobTitle: string, tasks: string[]): Prom
     - "Automate" (High pattern, high data, low human/complexity)
     - "Augment" (High complexity/creativity, mixed human)
     - "Human" (High human interaction, high judgment, low pattern)
+    
+    IMPORTANT: Ensure the 'description' field is in ${langName}.
 
     Tasks: ${JSON.stringify(tasks)}
   `;
@@ -97,9 +103,11 @@ export const generateCareerAnalysis = async (
   jobTitle: string, 
   assessedTasks: Task[],
   hardSkills: string[] = [],
-  softSkills: string[] = []
+  softSkills: string[] = [],
+  language: Language = 'en'
 ): Promise<AnalysisResult> => {
   const ai = getClient();
+  const langName = language === 'nl' ? 'Dutch' : 'English';
   
   const prompt = `
     Analyze the future impact of AI on the role of "${jobTitle}".
@@ -109,7 +117,7 @@ export const generateCareerAnalysis = async (
     - Current Hard Skills: ${JSON.stringify(hardSkills)}
     - Current Soft Skills: ${JSON.stringify(softSkills)}
 
-    Provide a comprehensive career strategy report including:
+    Provide a comprehensive career strategy report in ${langName} including:
     1. Percentages for Automate, Augment, Human.
     2. A timeline (0-6 months, 6-18 months, 18+ months) of expected changes.
     3. Specific AI tools relevant to this role.
@@ -194,13 +202,14 @@ export const speakText = async (text: string): Promise<ArrayBuffer | null> => {
 };
 
 // 5. Chat Bot (Pro)
-export const sendChatMessage = async (history: {role: string, parts: [{text: string}]}[], message: string) => {
+export const sendChatMessage = async (history: {role: string, parts: [{text: string}]}[], message: string, language: Language = 'en') => {
   const ai = getClient();
+  const langName = language === 'nl' ? 'Dutch' : 'English';
   const chat = ai.chats.create({
     model: 'gemini-3-pro-preview',
     history: history,
     config: {
-      systemInstruction: "You are a helpful AI Career Coach using the KAI model methodology. Keep answers concise and encouraging."
+      systemInstruction: `You are a helpful AI Career Coach using the KAI model methodology. Keep answers concise and encouraging. Respond in ${langName}.`
     }
   });
   

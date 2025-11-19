@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Step, Task, SavedProfile } from './types';
+import { Step, Task, SavedProfile, Language } from './types';
 import { Step1 } from './components/Step1';
 import { Step2 } from './components/Step2';
 import { Step3 } from './components/Step3';
@@ -8,7 +8,8 @@ import { Dashboard } from './components/Dashboard';
 import { LiveAgent } from './components/LiveAgent';
 import { ChatBot } from './components/ChatBot';
 import { EmbedGenerator } from './components/EmbedGenerator';
-import { Layers, ChevronRight, LayoutDashboard, Share2, X } from 'lucide-react';
+import { Layers, ChevronRight, LayoutDashboard, Share2, X, Globe } from 'lucide-react';
+import { translations } from './constants/translations';
 
 function App() {
   const [currentStep, setCurrentStep] = useState<Step>(Step.Scope);
@@ -19,6 +20,9 @@ function App() {
   const [assessedTasks, setAssessedTasks] = useState<Task[]>([]);
   const [loadedAnalysis, setLoadedAnalysis] = useState<any>(null);
   const [showHomeEmbed, setShowHomeEmbed] = useState(false);
+  const [language, setLanguage] = useState<Language>('nl'); // Default Dutch
+
+  const t = translations[language];
 
   const handleStep1Next = (title: string, tasks: string[], hard: string[], soft: string[]) => {
     setJobTitle(title);
@@ -57,6 +61,10 @@ function App() {
     setCurrentStep(Step.Dashboard);
   };
 
+  const toggleLanguage = () => {
+    setLanguage(prev => prev === 'nl' ? 'en' : 'nl');
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 relative">
       {/* Header */}
@@ -74,26 +82,42 @@ function App() {
             <div className="hidden md:flex items-center gap-4 text-sm font-medium">
               <div className={`flex items-center gap-2 ${currentStep >= Step.Scope ? 'text-blue-600' : 'text-slate-400'}`}>
                 <span className={`w-6 h-6 rounded-full flex items-center justify-center border ${currentStep >= Step.Scope ? 'bg-blue-50 border-blue-200' : 'border-slate-200'}`}>1</span>
-                Scope Job
+                {t.header.scope}
               </div>
               <ChevronRight size={16} className="text-slate-300" />
               <div className={`flex items-center gap-2 ${currentStep >= Step.Assess ? 'text-blue-600' : 'text-slate-400'}`}>
                 <span className={`w-6 h-6 rounded-full flex items-center justify-center border ${currentStep >= Step.Assess ? 'bg-blue-50 border-blue-200' : 'border-slate-200'}`}>2</span>
-                Assess Impact
+                {t.header.assess}
               </div>
               <ChevronRight size={16} className="text-slate-300" />
               <div className={`flex items-center gap-2 ${currentStep >= Step.Impact ? 'text-blue-600' : 'text-slate-400'}`}>
                 <span className={`w-6 h-6 rounded-full flex items-center justify-center border ${currentStep >= Step.Impact ? 'bg-blue-50 border-blue-200' : 'border-slate-200'}`}>3</span>
-                Career Strategy
+                {t.header.impact}
               </div>
             </div>
           )}
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Language Toggle */}
+            <div className="flex items-center bg-slate-100 rounded-lg p-1 border border-slate-200">
+               <button 
+                  onClick={() => setLanguage('nl')} 
+                  className={`px-2 py-1 rounded-md text-xs font-bold transition-all ${language === 'nl' ? 'bg-white shadow-sm text-blue-700' : 'text-slate-500'}`}
+               >
+                 NL
+               </button>
+               <button 
+                  onClick={() => setLanguage('en')} 
+                  className={`px-2 py-1 rounded-md text-xs font-bold transition-all ${language === 'en' ? 'bg-white shadow-sm text-blue-700' : 'text-slate-500'}`}
+               >
+                 EN
+               </button>
+            </div>
+
              <button 
                onClick={goToDashboard}
                className={`p-2 rounded-lg transition-colors ${currentStep === Step.Dashboard ? 'bg-blue-100 text-blue-700' : 'text-slate-500 hover:bg-slate-100'}`}
-               title="Dashboard"
+               title={t.header.dashboard}
              >
                <LayoutDashboard size={20} />
              </button>
@@ -103,18 +127,19 @@ function App() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative">
-        {currentStep === Step.Scope && <Step1 onNext={handleStep1Next} />}
-        {currentStep === Step.Assess && <Step2 jobTitle={jobTitle} rawTasks={rawTasks} onNext={handleStep2Next} />}
+        {currentStep === Step.Scope && <Step1 onNext={handleStep1Next} language={language} />}
+        {currentStep === Step.Assess && <Step2 jobTitle={jobTitle} rawTasks={rawTasks} onNext={handleStep2Next} language={language} />}
         {currentStep === Step.Impact && (
           <Step3 
             jobTitle={jobTitle} 
             assessedTasks={assessedTasks} 
             hardSkills={hardSkills}
             softSkills={softSkills}
-            existingAnalysis={loadedAnalysis} 
+            existingAnalysis={loadedAnalysis}
+            language={language}
           />
         )}
-        {currentStep === Step.Dashboard && <Dashboard onLoadProfile={handleLoadProfile} onNewAssessment={handleNewAssessment} />}
+        {currentStep === Step.Dashboard && <Dashboard onLoadProfile={handleLoadProfile} onNewAssessment={handleNewAssessment} language={language} />}
       </main>
 
       {/* Embed Generator - Only on Home Page (Scope) */}
@@ -124,9 +149,9 @@ function App() {
                <button 
                  onClick={() => setShowHomeEmbed(true)}
                  className="bg-slate-900 text-white p-3 rounded-l-xl shadow-lg hover:bg-slate-800 transition-all translate-x-1 hover:translate-x-0 flex items-center gap-2"
-                 title="Embed this tool"
+                 title={t.embed.title}
                >
-                 <span className="text-xs font-bold uppercase tracking-wider hidden md:block pl-1">Embed</span>
+                 <span className="text-xs font-bold uppercase tracking-wider hidden md:block pl-1">{t.embed.button}</span>
                  <Share2 size={20} />
                </button>
             ) : (
@@ -137,7 +162,7 @@ function App() {
                  >
                    <X size={16} />
                  </button>
-                 <EmbedGenerator />
+                 <EmbedGenerator language={language} />
                </div>
             )}
         </div>
@@ -146,8 +171,8 @@ function App() {
       {/* Persistent AI Assistants - Only Visible when Career Strategy is Generated (Step.Impact) */}
       {currentStep === Step.Impact && (
         <>
-          <ChatBot />
-          <LiveAgent />
+          <ChatBot language={language} />
+          <LiveAgent language={language} />
         </>
       )}
     </div>

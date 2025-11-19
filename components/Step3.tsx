@@ -1,11 +1,12 @@
 
 import React, { useEffect, useState } from 'react';
-import { Task, AnalysisResult } from '../types';
+import { Task, AnalysisResult, Language } from '../types';
 import { generateCareerAnalysis, speakText } from '../services/geminiService';
 import { saveProfile } from '../services/storageService';
 import { EmbedGenerator } from './EmbedGenerator';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Play, Pause, CheckCircle2, Zap, Cpu, Save, Share2, X } from 'lucide-react';
+import { translations } from '../constants/translations';
 
 interface Step3Props {
   jobTitle: string;
@@ -13,9 +14,10 @@ interface Step3Props {
   hardSkills: string[];
   softSkills: string[];
   existingAnalysis?: AnalysisResult;
+  language: Language;
 }
 
-export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkills, softSkills, existingAnalysis }) => {
+export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkills, softSkills, existingAnalysis, language }) => {
   const [result, setResult] = useState<AnalysisResult | null>(existingAnalysis || null);
   const [loading, setLoading] = useState(!existingAnalysis);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -24,13 +26,16 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
   const [isSaved, setIsSaved] = useState(false);
   const [showEmbed, setShowEmbed] = useState(false);
 
+  const t = translations[language].step3;
+  const commonT = translations[language].step2; // borrow category names
+
   useEffect(() => {
     if (existingAnalysis) return;
 
     const fetchAnalysis = async () => {
       try {
-        // This uses Thinking Budget 32k
-        const analysis = await generateCareerAnalysis(jobTitle, assessedTasks, hardSkills, softSkills);
+        // This uses Thinking Budget 32k (actually reduced to 2048 now in service)
+        const analysis = await generateCareerAnalysis(jobTitle, assessedTasks, hardSkills, softSkills, language);
         setResult(analysis);
       } catch (error) {
         console.error(error);
@@ -40,7 +45,7 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
     };
     fetchAnalysis();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jobTitle, assessedTasks, hardSkills, softSkills]);
+  }, [jobTitle, assessedTasks, hardSkills, softSkills, language]);
 
   const playAudio = async (text: string) => {
     if (isPlaying && sourceNode) {
@@ -84,8 +89,8 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
              </div>
            </div>
         </div>
-        <p className="text-slate-500 font-medium">Generating strategic career report...</p>
-        <p className="text-xs text-slate-400">Powered by Gemini 3 Pro (Thinking Mode)</p>
+        <p className="text-slate-500 font-medium">{t.loading}</p>
+        <p className="text-xs text-slate-400">{t.loadingSub}</p>
       </div>
     );
   }
@@ -93,9 +98,9 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
   if (!result) return <div>Error loading results.</div>;
 
   const pieData = [
-    { name: 'Automate', value: result.percentages.automate, color: '#ef4444' }, // Red
-    { name: 'Augment', value: result.percentages.augment, color: '#3b82f6' },  // Blue
-    { name: 'Human', value: result.percentages.human, color: '#22c55e' },    // Green
+    { name: commonT.automate, value: result.percentages.automate, color: '#ef4444' }, // Red
+    { name: commonT.augment, value: result.percentages.augment, color: '#3b82f6' },  // Blue
+    { name: commonT.human, value: result.percentages.human, color: '#22c55e' },    // Green
   ];
 
   return (
@@ -119,7 +124,7 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
              >
                <X size={16} />
              </button>
-             <EmbedGenerator />
+             <EmbedGenerator language={language} />
            </div>
         )}
       </div>
@@ -127,11 +132,11 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <div className="text-center md:text-left space-y-2">
-          <h2 className="text-4xl font-bold text-slate-900">Your Future as a {jobTitle}</h2>
+          <h2 className="text-4xl font-bold text-slate-900">{t.title} {jobTitle}</h2>
           <div className="flex justify-center md:justify-start items-center gap-4">
-            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-red-500"></div><span className="text-sm">Automate</span></div>
-            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="text-sm">Augment</span></div>
-            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-green-500"></div><span className="text-sm">Human</span></div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-red-500"></div><span className="text-sm">{commonT.automate}</span></div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="text-sm">{commonT.augment}</span></div>
+            <div className="flex items-center gap-1"><div className="w-3 h-3 rounded-full bg-green-500"></div><span className="text-sm">{commonT.human}</span></div>
           </div>
         </div>
         <button
@@ -141,7 +146,7 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
             isSaved ? 'bg-green-100 text-green-700' : 'bg-white text-slate-800 hover:bg-slate-50 border border-slate-200'
           }`}
         >
-          {isSaved ? <><CheckCircle2 size={20} /> Saved</> : <><Save size={20} /> Save Profile</>}
+          {isSaved ? <><CheckCircle2 size={20} /> {t.saved}</> : <><Save size={20} /> {t.saveButton}</>}
         </button>
       </div>
 
@@ -150,7 +155,7 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
         
         {/* Donut Chart */}
         <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-100 flex flex-col items-center">
-          <h3 className="text-lg font-semibold mb-4 text-slate-800">Impact Distribution</h3>
+          <h3 className="text-lg font-semibold mb-4 text-slate-800">{t.distribution}</h3>
           <div className="h-64 w-full relative">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -172,14 +177,14 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
             </ResponsiveContainer>
             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
                <span className="text-3xl font-bold text-slate-800">{result.percentages.augment}%</span>
-               <p className="text-xs text-slate-500 font-medium uppercase">Augment</p>
+               <p className="text-xs text-slate-500 font-medium uppercase">{commonT.augment}</p>
             </div>
           </div>
         </div>
 
         {/* Timeline Table */}
         <div className="bg-white p-6 rounded-3xl shadow-lg border border-slate-100">
-          <h3 className="text-lg font-semibold mb-4 text-slate-800">Impact Timeline</h3>
+          <h3 className="text-lg font-semibold mb-4 text-slate-800">{t.timeline}</h3>
           <div className="space-y-4">
             {result.timeline.map((item, i) => (
               <div key={i} className="flex items-start gap-4 pb-4 border-b border-slate-50 last:border-0">
@@ -189,7 +194,7 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
                     <span className={`text-xs font-bold px-2 py-0.5 rounded ${
                       item.impactLevel === 'High' ? 'bg-red-100 text-red-600' : 
                       item.impactLevel === 'Medium' ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'
-                    }`}>{item.impactLevel} Impact</span>
+                    }`}>{item.impactLevel} {t.impact}</span>
                   </div>
                   <p className="text-sm text-slate-600 leading-relaxed">{item.prediction}</p>
                 </div>
@@ -205,7 +210,7 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
         <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-3xl shadow-lg md:col-span-1">
           <div className="flex items-center gap-2 mb-4 text-blue-300">
             <Cpu size={20} />
-            <h3 className="font-semibold">AI Tools to Master</h3>
+            <h3 className="font-semibold">{t.tools}</h3>
           </div>
           <ul className="space-y-3">
             {result.tools.slice(0, 5).map((tool, i) => (
@@ -225,7 +230,7 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2 text-blue-600">
                <CheckCircle2 size={20} />
-               <h3 className="font-semibold">30-Day Action Plan</h3>
+               <h3 className="font-semibold">{t.plan}</h3>
             </div>
             <button 
               onClick={() => playAudio(result.actionPlan)}
@@ -240,7 +245,7 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
           </p>
           
           <div className="mt-6 pt-6 border-t border-slate-100">
-            <h4 className="text-sm font-bold text-slate-900 mb-3">Key Skills to Develop</h4>
+            <h4 className="text-sm font-bold text-slate-900 mb-3">{t.skills}</h4>
             <div className="flex flex-wrap gap-2">
               {result.skillsToDevelop.map((skill, i) => (
                 <span key={i} className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-sm font-medium hover:bg-slate-200 transition-colors">
@@ -253,10 +258,10 @@ export const Step3: React.FC<Step3Props> = ({ jobTitle, assessedTasks, hardSkill
       </div>
 
       <div className="bg-blue-600 rounded-2xl p-8 text-center text-white shadow-xl">
-        <h3 className="text-2xl font-bold mb-2">Ready to future-proof your career?</h3>
-        <p className="text-blue-100 mb-6">Start learning these skills today.</p>
+        <h3 className="text-2xl font-bold mb-2">{t.footerTitle}</h3>
+        <p className="text-blue-100 mb-6">{t.footerSub}</p>
         <button className="px-6 py-3 bg-white text-blue-600 rounded-lg font-bold hover:bg-blue-50 transition-colors">
-          Explore Learning Resources
+          {t.footerButton}
         </button>
       </div>
     </div>

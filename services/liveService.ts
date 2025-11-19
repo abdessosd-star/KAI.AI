@@ -1,4 +1,6 @@
+
 import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
+import { Language } from '../types';
 
 // Audio Helpers (from guide)
 function decode(base64: string) {
@@ -61,10 +63,12 @@ export class LiveSessionManager {
   private stream: MediaStream | null = null;
   private sessionPromise: Promise<any> | null = null;
   private onStatusChange: (status: string) => void;
+  private language: Language;
 
-  constructor(onStatusChange: (status: string) => void) {
+  constructor(onStatusChange: (status: string) => void, language: Language) {
     this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     this.onStatusChange = onStatusChange;
+    this.language = language;
   }
 
   async connect() {
@@ -72,6 +76,8 @@ export class LiveSessionManager {
     this.outputAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
     const outputNode = this.outputAudioContext.createGain();
     outputNode.connect(this.outputAudioContext.destination);
+
+    const langInstruction = this.language === 'nl' ? 'Speak in Dutch.' : 'Speak in English.';
 
     try {
       this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -129,7 +135,7 @@ export class LiveSessionManager {
           speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
           },
-          systemInstruction: 'You are an encouraging career coach helping a user navigate AI transformation in their job. Be concise, friendly, and helpful.',
+          systemInstruction: `You are an encouraging career coach helping a user navigate AI transformation in their job. Be concise, friendly, and helpful. ${langInstruction}`,
         }
       });
     } catch (err) {

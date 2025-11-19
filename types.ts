@@ -1,4 +1,6 @@
 
+export type Language = 'nl' | 'en';
+
 export interface Task {
   id: string;
   description: string;
