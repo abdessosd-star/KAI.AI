@@ -135,7 +135,7 @@ export class LiveSessionManager {
           speechConfig: {
             voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Zephyr' } },
           },
-          systemInstruction: `You are an encouraging career coach helping a user navigate AI transformation in their job. Be concise, friendly, and helpful. ${langInstruction}`,
+          systemInstruction: { parts: [{ text: `You are an encouraging career coach helping a user navigate AI transformation in their job. Be concise, friendly, and helpful. ${langInstruction}` }] },
         }
       });
     } catch (err) {
@@ -155,7 +155,7 @@ export class LiveSessionManager {
         const pcmBlob = createBlob(inputData);
         
         this.sessionPromise?.then((session) => {
-            session.sendRealtimeInput({ media: pcmBlob });
+            session.sendRealtimeInput([pcmBlob]);
         });
     };
 

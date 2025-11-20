@@ -9,6 +9,7 @@ import { Landing } from './components/Landing';
 import { LiveAgent } from './components/LiveAgent';
 import { ChatBot } from './components/ChatBot';
 import { EmbedGenerator } from './components/EmbedGenerator';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { Layers, ChevronRight, LayoutDashboard, Share2, X, Globe, Loader2 } from 'lucide-react';
 import { translations } from './constants/translations';
 
@@ -187,13 +188,15 @@ function AppContent() {
 
 function App() {
   return (
-    <Suspense fallback={
-      <div className="h-screen w-screen flex items-center justify-center bg-slate-50">
-        <Loader2 className="animate-spin text-blue-600" size={48} />
-      </div>
-    }>
-      <AppContent />
-    </Suspense>
+    <ErrorBoundary>
+      <Suspense fallback={
+        <div className="h-screen w-screen flex items-center justify-center bg-slate-50">
+          <Loader2 className="animate-spin text-blue-600" size={48} />
+        </div>
+      }>
+        <AppContent />
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 
