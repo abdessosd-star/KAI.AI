@@ -68,7 +68,7 @@ export const assessTasksWithAI = async (jobTitle: string, tasks: string[], langu
     model: 'gemini-2.5-flash',
     contents: prompt,
     config: {
-      thinkingConfig: { thinkingBudget: 2048 }, // Reduced budget for faster response
+      // thinkingConfig: { thinkingBudget: 2048 }, // Reduced budget for faster response
       responseMimeType: 'application/json',
       responseSchema: {
         type: Type.ARRAY,
@@ -130,7 +130,7 @@ export const generateCareerAnalysis = async (
     model: 'gemini-2.5-flash',
     contents: prompt,
     config: {
-      thinkingConfig: { thinkingBudget: 2048 }, // Reduced budget for faster response
+      // thinkingConfig: { thinkingBudget: 2048 }, // Reduced budget for faster response
       responseMimeType: 'application/json',
       responseSchema: {
         type: Type.OBJECT,
@@ -202,7 +202,7 @@ export const speakText = async (text: string): Promise<ArrayBuffer | null> => {
 };
 
 // 5. Chat Bot (Pro)
-export const sendChatMessage = async (history: {role: string, parts: [{text: string}]}[], message: string, language: Language = 'en') => {
+export const sendChatMessage = async (history: {role: string, parts: {text: string}[]}[], message: string, language: Language = 'en') => {
   const ai = getClient();
   const langName = language === 'nl' ? 'Dutch' : 'English';
   const chat = ai.chats.create({
