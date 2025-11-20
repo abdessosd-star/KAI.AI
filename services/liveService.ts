@@ -66,7 +66,7 @@ export class LiveSessionManager {
   private language: Language;
 
   constructor(onStatusChange: (status: string) => void, language: Language) {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    this.ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || process.env.API_KEY });
     this.onStatusChange = onStatusChange;
     this.language = language;
   }
