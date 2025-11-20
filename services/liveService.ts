@@ -69,7 +69,6 @@ export class LiveSessionManager {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (window.process && window.process.env && window.process.env.API_KEY);
     if (!apiKey) {
        console.error("API Key is missing");
-       // Do not throw here to avoid crashing the UI before user interacts, but LiveAgent will fail.
     }
     this.ai = new GoogleGenAI({ apiKey: apiKey || "" });
     this.onStatusChange = onStatusChange;

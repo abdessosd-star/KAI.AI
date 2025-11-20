@@ -7,9 +7,9 @@ const getClient = () => {
   const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (window.process && window.process.env && window.process.env.API_KEY);
   if (!apiKey) {
     console.error("API Key is missing");
-    throw new Error("API Key is missing");
+    // Optional: Throw error or handle gracefully?
   }
-  return new GoogleGenAI({ apiKey });
+  return new GoogleGenAI({ apiKey: apiKey || "" });
 };
 
 // 1. Suggest Role Details (Flash - Fast)
