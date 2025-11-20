@@ -50,7 +50,7 @@ export const ChatBot: React.FC<ChatBotProps> = ({ language }) => {
       // Construct history for API
       const history = messages.map(m => ({
         role: m.role === 'user' ? 'user' : 'model',
-        parts: [{ text: m.text }]
+        parts: [{ text: m.text }] // Ensure parts is array of objects with text
       }));
 
       const responseText = await sendChatMessage(history, newUserMessage.text, language);

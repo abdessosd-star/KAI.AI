@@ -11,6 +11,8 @@ export default defineConfig(({ mode }) => {
     define: {
       // polyfill process.env for the app
       'process.env.API_KEY': JSON.stringify(env.API_KEY || process.env.API_KEY),
+      // Prevent crash if libs check process.env
+      'process.env': {},
     },
     build: {
       outDir: 'dist',

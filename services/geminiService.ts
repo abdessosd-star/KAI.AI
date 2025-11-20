@@ -3,7 +3,14 @@ import { GoogleGenAI, Type, Modality } from "@google/genai";
 import { Task, AnalysisResult, Language } from "../types";
 
 // Helper to get client with key
-const getClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getClient = () => {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (window.process && window.process.env && window.process.env.API_KEY);
+  if (!apiKey) {
+    console.error("API Key is missing");
+    // Optional: Throw error or handle gracefully?
+  }
+  return new GoogleGenAI({ apiKey: apiKey || "" });
+};
 
 // 1. Suggest Role Details (Flash - Fast)
 export const suggestRoleDetails = async (jobTitle: string, language: Language = 'en'): Promise<{ tasks: string[], hardSkills: string[], softSkills: string[] }> => {
